@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>API Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testTicket()">Test Create Ticket</button>
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'testuser',
+                        password: 'test123'
+                    })
+                });
+                
+                const token = await response.text();
+                document.getElementById('result').innerHTML = 'Login successful: ' + token;
+                localStorage.setItem('token', token);
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Login error: ' + error.message;
+            }
+        }
+
+        async function testTicket() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/tickets', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        subject: 'Test Ticket from HTML',
+                        description: 'Test Description',
+                        priority: 'MEDIUM'
+                    })
+                });
+                
+                const result = await response.text();
+                document.getElementById('result').innerHTML = 'Ticket creation: ' + result;
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Ticket error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

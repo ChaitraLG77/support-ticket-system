@@ -9,8 +9,6 @@ export default function TicketsPage() {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("LOW");
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
 
   const [tickets, setTickets] = useState([]);
   const [activeTab, setActiveTab] = useState("create");
@@ -31,31 +29,28 @@ export default function TicketsPage() {
 
   const createTicket = async () => {
     try {
-      await apiRequest(
-        "/tickets",
-        "POST",
-        { subject, description, priority },
-        { username, password }
-      );
+      await apiRequest("/tickets", "POST", {
+        subject, 
+        description, 
+        priority
+      });
+      
       alert("Ticket created successfully");
       setSubject("");
       setDescription("");
-    } catch {
-      alert("Failed to create ticket");
+      // Reload tickets after creating
+      loadTickets();
+    } catch (err) {
+      alert("Failed to create ticket: " + err.message);
     }
   };
 
   const loadTickets = async () => {
     try {
-      const data = await apiRequest(
-        "/tickets",
-        "GET",
-        null,
-        { username, password }
-      );
+      const data = await apiRequest("/tickets", "GET");
       setTickets(data);
-    } catch {
-      alert("Failed to load tickets");
+    } catch (err) {
+      alert("Failed to load tickets: " + err.message);
     }
   };
 
@@ -73,14 +68,22 @@ export default function TicketsPage() {
           </p>
         </div>
 
-       <Link
-         href="/tickets/new"
-         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-       >
-         + New Ticket
-       </Link>
-
+        <div className="flex gap-3">
+          <Link
+            href="/tickets/new"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            + New Ticket
+          </Link>
+          <button
+            onClick={loadTickets}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          >
+            Load Tickets
+          </button>
+        </div>
       </div>
+
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

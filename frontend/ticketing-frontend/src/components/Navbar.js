@@ -2,10 +2,34 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import { useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 export default function Navbar() {
   const router = useRouter();
+  const [username, setUsername] = useState(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const decoded = jwtDecode(token);
+      setUsername(decoded.sub);
+    } catch {
+      localStorage.removeItem("token");
+      router.push("/login");
+    }
+  }, [router]);
+
+  // 🔐 Prevent hydration mismatch
+  if (!mounted) return null;
 
   return (
     <aside className="w-64 bg-slate-900 text-white flex flex-col">
@@ -32,18 +56,18 @@ export default function Navbar() {
           My Tickets
         </button>
 
-       <Link
-         href="/tickets/new"
-         className="flex items-center gap-2 px-4 py-2 rounded hover:bg-slate-700 text-white"
-       >
-         + New Ticket
-       </Link>
-
+        <Link
+          href="/tickets/new"
+          className="flex items-center gap-2 px-4 py-2 rounded hover:bg-slate-700 text-white"
+        >
+          + New Ticket
+        </Link>
       </nav>
 
       {/* User */}
       <div className="p-4 border-t border-slate-700 text-sm text-slate-400">
-        John Doe<br />
+        {username}
+        <br />
         <span className="text-xs">User</span>
       </div>
 

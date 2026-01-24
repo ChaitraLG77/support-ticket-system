@@ -13,20 +13,42 @@ export default function NewTicketPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const createTicket = async () => {
-    try {
-      await apiRequest(
-        "/tickets",
-        "POST",
-        { subject, description, priority },
-        { username, password }
-      );
-      alert("Ticket created successfully");
-      router.push("/tickets");
-    } catch {
-      alert("Failed to create ticket");
-    }
-  };
+ const createTicket = async () => {
+   try {
+     // First authenticate if not already logged in
+     if (!localStorage.getItem("token")) {
+       if (!username || !password) {
+         alert("Please enter username and password");
+         return;
+       }
+       
+       const loginResponse = await apiRequest("/auth/login", "POST", {
+         username,
+         password
+       });
+       
+       localStorage.setItem("token", loginResponse);
+     }
+
+     // Now create the ticket
+     await apiRequest("/tickets", "POST", {
+       subject,
+       description,
+       priority
+     });
+
+     alert("Ticket created successfully");
+     router.push("/tickets");
+
+   } catch (err) {
+     console.error("Full error:", err);
+     console.error("Error message:", err.message);
+     console.error("Error stack:", err.stack);
+     alert("Failed to create ticket. Check console for details.");
+   }
+ };
+
+
 
   return (
     <div className="flex justify-center py-10">
@@ -42,6 +64,12 @@ export default function NewTicketPage() {
             className="border p-3 rounded"
             placeholder="Username"
             onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            className="border p-3 rounded"
+            type="password"
+            placeholder="Password"
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 

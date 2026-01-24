@@ -1,4 +1,6 @@
 package com.example.Ticketing.System.controller;
+import com.example.Ticketing.System.security.JwtUtil;
+
 
 import com.example.Ticketing.System.dto.LoginRequest;
 import com.example.Ticketing.System.dto.RegisterRequest;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final UserRepository userRepository;
@@ -43,8 +46,10 @@ public class AuthController {
             throw new RuntimeException("Invalid username or password");
         }
 
-        return "Login successful";
+        // ✅ Generate JWT
+        return JwtUtil.generateToken(user.getUsername());
     }
+
     @PostMapping("/logout")
     public String logout() {
         return "Logout successful";
